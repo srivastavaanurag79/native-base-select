@@ -1,4 +1,4 @@
-import MultiSelectInput from './components/multi-select/multi-select.component';
-import SelectInput from './components/select/select.component';
+import BTMultiSelect from './components/multi-select/multi-select.component';
+import BTSingleSelect from './components/select/select.component';
 
-export { MultiSelectInput, SelectInput };
+export { BTMultiSelect, BTSingleSelect };

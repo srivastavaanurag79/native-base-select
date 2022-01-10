@@ -1,25 +1,47 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { memo, useState, useEffect } from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { Actionsheet, Text, useDisclose, ScrollView } from 'native-base';
-import Icon from 'react-native-vector-icons/Ionicons';
+import {
+  View,
+  TouchableOpacity,
+  Image,
+  Platform,
+  TextInput,
+} from 'react-native';
+import {
+  Actionsheet,
+  Text,
+  useDisclose,
+  ScrollView,
+  KeyboardAvoidingView,
+} from 'native-base';
+import type { Select } from 'src/interface/select.interface';
 
-const MultiSelectInput = ({
+const BTMultiSelect = ({
   label,
   list,
   onSelection,
-  value,
   selectedList,
   placeholder,
-}: any) => {
+  pillStyle,
+  placeHolderStyle,
+  labelStyle,
+  selectInputStyle,
+  errorText,
+  errorStyle,
+  listTextStyle,
+  actionSheetBackgroundColor,
+  searchStyle,
+}: Select) => {
   const [arrayList, setArrayList] = useState([...list]);
+  const [arrayHolder, setArrayHolder] = useState([...list]);
   const { isOpen, onOpen, onClose } = useDisclose();
   const [selectedValues, setSelectedValues] = useState([...selectedList]); // selected values
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     setArrayList([...list]);
     setSelectedValues([...selectedList]);
-  }, [value, list, selectedList]);
+  }, [list, selectedList]);
 
   const _onClose = () => {
     var data = [...arrayList];
@@ -32,14 +54,15 @@ const MultiSelectInput = ({
         }
       });
     });
-    value = _temp.join();
     onSelection({ text: _temp.join(), selectedList: selectedData });
     // selectInputRef.current.blur();
+    setSearch('');
     onClose();
   };
 
   const _onFocus = () => {
     setArrayList([...list]);
+    setArrayHolder([...list]);
     setSelectedValues([...selectedList]);
     onOpen();
   };
@@ -54,12 +77,28 @@ const MultiSelectInput = ({
     setSelectedValues(selectedData);
   };
   const _exists = (item: any) => {
-    return selectedValues.indexOf(item) > -1 ? true : false;
+    const existingData = [...selectedValues];
+    return existingData.indexOf(item) > -1 ? true : false;
+  };
+
+  const _filterFunction = (text: string) => {
+    setSearch(text);
+    const newData = arrayHolder.filter((item) =>
+      item.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setArrayList(newData);
   };
   return (
     <View style={{ marginTop: 20, width: '100%' }}>
       {label && (
-        <Text style={{ marginBottom: 10, fontWeight: '700', fontSize: 15 }}>
+        <Text
+          style={{
+            marginBottom: 10,
+            fontWeight: labelStyle?.fontWeight || '700',
+            fontSize: labelStyle?.fontSize || 15,
+            color: labelStyle?.textColor || '#000',
+          }}
+        >
           {label}
         </Text>
       )}
@@ -68,27 +107,36 @@ const MultiSelectInput = ({
           style={{
             flexDirection: 'row',
             flexGrow: 1,
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-            backgroundColor: '#e5e5e5',
-            borderRadius: 6,
+            paddingHorizontal: selectInputStyle?.paddingHorizontal || 14,
+            paddingVertical: selectInputStyle?.paddingVertical || 12,
+            backgroundColor: selectInputStyle?.backgroundColor || '#e5e5e5',
+            borderRadius: selectInputStyle?.borderRadius || 6,
             flexWrap: 'wrap',
             minHeight: 45,
             height: 'auto',
           }}
         >
           {selectedList.length === 0 ? (
-            <Text style={{ color: 'gray', fontSize: 12 }}>{placeholder}</Text>
+            <Text
+              style={{
+                color: placeHolderStyle?.textColor || 'gray',
+                fontSize: placeHolderStyle?.fontSize || 12,
+                fontWeight: placeHolderStyle?.fontWeight || '400',
+              }}
+            >
+              {placeholder}
+            </Text>
           ) : (
             selectedList.map((el: any, index: number) => {
               return (
                 <Text
                   key={index}
                   style={{
-                    fontSize: 14,
-                    backgroundColor: 'silver',
-                    padding: 5,
-                    borderRadius: 6,
+                    fontSize: pillStyle?.fontSize || 14,
+                    backgroundColor: pillStyle?.backgroundColor || 'silver',
+                    color: pillStyle?.textColor || '#000',
+                    padding: 8,
+                    borderRadius: pillStyle?.borderRadius || 6,
                     margin: 3,
                   }}
                 >
@@ -99,7 +147,6 @@ const MultiSelectInput = ({
           )}
         </View>
       </TouchableOpacity>
-
       <Actionsheet
         isOpen={isOpen}
         hideDragIndicator={true}
@@ -108,34 +155,124 @@ const MultiSelectInput = ({
         }}
         size="full"
       >
-        <Actionsheet.Content>
-          <ScrollView style={{ width: '100%' }}>
-            {arrayList.map((el, index) => {
-              return (
-                <Actionsheet.Item
-                  onPress={() => _onClick(el)}
-                  key={index}
-                  startIcon={
-                    _exists(el) ? (
-                      <Icon
-                        name="md-checkmark-circle"
-                        size={24}
-                        color="black"
-                      />
-                    ) : (
-                      <View style={{ paddingHorizontal: 12 }} />
-                    )
-                  }
-                >
-                  <Text key={index}>{el.name}</Text>
-                </Actionsheet.Item>
-              );
-            })}
-          </ScrollView>
+        <View
+          style={{
+            justifyContent: 'center',
+            alignContent: 'center',
+            alignSelf: 'center',
+            alignItems: 'center',
+            top: -20,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              _onClose();
+            }}
+            style={{ borderRadius: 50, backgroundColor: 'white', padding: 3 }}
+          >
+            <Image
+              source={require('../../assets/cancel.png')}
+              resizeMode="contain"
+              resizeMethod="auto"
+              style={{
+                width: 50,
+                height: 50,
+                justifyContent: 'center',
+                alignSelf: 'center',
+              }}
+            />
+          </TouchableOpacity>
+        </View>
+        <Actionsheet.Content
+          style={{ backgroundColor: actionSheetBackgroundColor || '#f5f5f5' }}
+        >
+          <KeyboardAvoidingView
+            style={{ width: '100%', maxHeight: 350 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <TextInput
+              placeholder="Search"
+              inlineImageLeft="search_icon"
+              onChangeText={(text: string) => _filterFunction(text)}
+              value={search}
+              style={{
+                height: 40,
+                borderRadius: searchStyle?.borderRadius || 20,
+                fontSize: 12,
+                paddingLeft: 10,
+                paddingRight: 10,
+                borderColor: searchStyle?.borderColor || '#e5e5e5',
+                borderWidth: 1,
+                backgroundColor: searchStyle?.backgroundColor || '#e5e5e5',
+                marginVertical: 10,
+                marginHorizontal: 8,
+                color: searchStyle?.textColor || '#000',
+              }}
+            />
+            <ScrollView
+              persistentScrollbar={true}
+              showsVerticalScrollIndicator={true}
+              style={{ width: '100%', marginBottom: 20 }}
+            >
+              {arrayList.map((el, index) => {
+                return (
+                  <Actionsheet.Item
+                    onPress={() => _onClick(el)}
+                    key={index}
+                    startIcon={
+                      _exists(el) ? (
+                        <Image
+                          source={require('../../assets/check.png')}
+                          resizeMode="contain"
+                          resizeMethod="auto"
+                          style={{
+                            width: 24,
+                            height: 24,
+                            justifyContent: 'center',
+                            alignSelf: 'center',
+                          }}
+                        />
+                      ) : (
+                        <Image
+                          source={require('../../assets/uncheck.png')}
+                          resizeMode="contain"
+                          resizeMethod="auto"
+                          style={{
+                            width: 20,
+                            height: 20,
+                            justifyContent: 'center',
+                            alignSelf: 'center',
+                          }}
+                        />
+                      )
+                    }
+                  >
+                    <Text key={index} style={listTextStyle}>
+                      {el.name}
+                    </Text>
+                  </Actionsheet.Item>
+                );
+              })}
+            </ScrollView>
+          </KeyboardAvoidingView>
         </Actionsheet.Content>
       </Actionsheet>
+      {errorText.length > 0 ? (
+        <Text
+          style={{
+            marginBottom: 10,
+            fontWeight: errorStyle?.fontWeight || '500',
+            fontSize: errorStyle?.fontSize || 12,
+            color: errorStyle?.textColor || 'red',
+          }}
+        >
+          {errorText}
+        </Text>
+      ) : (
+        <View style={{ margin: 0 }} />
+      )}
     </View>
   );
 };
 
-export default memo(MultiSelectInput);
+export default memo(BTMultiSelect);
