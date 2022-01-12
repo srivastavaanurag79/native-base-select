@@ -1,7 +1,7 @@
 {
   "name": "@blump-tech/native-base-select",
-  "version": "0.1.1",
-  "description": "Select creates a dropdown list of items with the selected item in closed view.",
+  "version": "0.2.0",
+  "description": "This module includes a customizable multi-select and a single select component for Native Base. It creates a list of items with the selected item in closed view.",
   "main": "lib\\commonjs\\index.js",
   "module": "lib\\module\\index.js",
   "types": "lib\\typescript\\src\\index.d.ts",

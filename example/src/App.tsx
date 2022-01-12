@@ -1,10 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import * as React from 'react';
 
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { BTSingleSelect, BTMultiSelect } from '../../src/index';
 
 export default function App() {
+  const [successText, setSuccessText] = React.useState('');
   const [language, setLanguage] = React.useState({
     value: '',
     list: [
@@ -43,6 +44,17 @@ export default function App() {
     selectedList: [],
     error: '',
   });
+  const _submit = () => {
+    if (language.selectedList.length === 0) {
+      setLanguage({ ...language, error: 'Please select language' });
+      return;
+    }
+    if (gender.selectedList.length === 0) {
+      setGender({ ...gender, error: 'Please select gender.' });
+      return;
+    }
+    setSuccessText('Submitted......');
+  };
   return (
     <View style={styles.container}>
       <BTMultiSelect
@@ -79,6 +91,26 @@ export default function App() {
         pillStyle={{ backgroundColor: 'yellow' }}
         errorStyle={{ textColor: 'red' }}
       />
+      <TouchableOpacity
+        onPress={() => {
+          _submit();
+        }}
+        style={{
+          padding: 16,
+          width: '100%',
+          justifyContent: 'center',
+          alignContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'green',
+          borderRadius: 8,
+          marginTop: 10,
+        }}
+      >
+        <Text style={{ color: 'white', fontSize: 15, fontWeight: '600' }}>
+          Submit
+        </Text>
+      </TouchableOpacity>
+      <Text style={{ color: 'green', marginTop: 10 }}>{successText}</Text>
     </View>
   );
 }
