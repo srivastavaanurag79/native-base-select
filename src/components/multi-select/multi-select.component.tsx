@@ -78,7 +78,7 @@ const BTMultiSelect = ({
   };
   const _exists = (item: any) => {
     const existingData = [...selectedValues];
-    return existingData.indexOf(item) > -1 ? true : false;
+    return existingData.map(e => e._id).indexOf(item._id) > -1 ? true : false;
   };
 
   const _filterFunction = (text: string) => {
